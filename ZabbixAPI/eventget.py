@@ -7,7 +7,7 @@
 ■標準出力
 　抽出結果（ＣＳＶ）
 
-2015/09/18 13:00 updated
+2015/09/18 13:58 updated
 
 """
 import os
@@ -102,7 +102,7 @@ class History(initializer.ZabiCloudInitializer):
         #api_ver = self.get_api_ver()
         api_ver = 2
         LOG.info("  --- api_call() ---")
-        LOG.info("  api-ver: %s" % api_ver)
+        LOG.info("  api-ver: %s" % self.get_api_ver())
         LOG.info("  self.zabi.zabi_session.%s" % api_method[api_ver])
         LOG.info("  parameter: %s" % parameter)
         try:
@@ -213,4 +213,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
