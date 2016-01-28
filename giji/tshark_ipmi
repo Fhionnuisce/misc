@@ -1,0 +1,7 @@
+tshark -f "port 623 and udp"
+
+tshark -f "port 623 and udp and host 10.245.100.1"
+
+tshark -c 5 -f "port 623 and udp" -w ipmi.cap
+
+ipmitool -U tbmcipmi -P Zbx1PM1pw -H 10.245.100.1 sensor list
