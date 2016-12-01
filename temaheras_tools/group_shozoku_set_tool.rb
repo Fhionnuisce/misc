@@ -15,8 +15,7 @@ end
 csv_input_file = ARGV[0]
 csv_success_file = './group_success.csv'
 csv_failure_file = './group_failure.csv'
-result_success = []
-result_failure = []
+csv_skip_file = './group_skip.csv'
 
 username = 'admin'
 password = 'Inte11i8ence'
@@ -43,9 +42,9 @@ begin
   csv_input_array = CSV.read(csv_input_file)
   csv_input_array.collect! {|ary| [ary[0], ary[1]]}
   csv_input_hash = Hash[*csv_input_array.flatten]
-  puts "--------------------------------------------"
+  puts "------------------------------------------------------"
   puts "INFO: complete CSV load! #{csv_input_hash.length} records."
-  puts "--------------------------------------------"
+  puts "------------------------------------------------------"
 rescue => e
   STDERR.puts "ERROR:[CSV load]: #{e}"
   exit
@@ -63,16 +62,23 @@ page = agent.submit(form)
 begin
   csv_success = CSV.open(csv_success_file, 'w')
   csv_failure = CSV.open(csv_failure_file, 'w')
+  csv_skip = CSV.open(csv_skip_file, 'w')
 
   csv_input_hash.each_with_index do |(uid, cf_val), i|
     begin
+      cf_val = cf_val.to_s
+      puts
       p [i,  [uid, cf_val]]
-      next if uid.to_i == 0
-      next if cf_val.nil?
-      print ' => '
+      if uid.to_i == 0
+        e = "id=`#{uid}` < 1, or not Integer."
+        puts "Skip: #{e}"
+        csv_skip.puts [uid, cf_val, e]
+        next
+      end
       url_path = url_root + "/groups/#{uid}/edit"
       page = agent.get(url_path)
       form = page.forms[1]
+      print ' => '
       p form.field_with(:name => cf_name)
       form.field_with(:name => cf_name).value = cf_val
       page = agent.submit(form)
@@ -102,6 +108,12 @@ rescue => e
 ensure
   csv_success.close
   csv_failure.close
+  csv_skip.close
+  puts "------------------------------------------------------"
+  puts "INFO: finished."
+  puts
+  puts "  Success: #{csv_success.lineno} / Failure: #{csv_failure.lineno} / Skip: #{csv_skip.lineno} / Total: #{csv_input_hash.length}"
+  puts "------------------------------------------------------"
 end
 
 ### logout
